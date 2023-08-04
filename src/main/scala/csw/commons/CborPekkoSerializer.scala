@@ -5,12 +5,12 @@
 
 package csw.commons
 
-import org.apache.pekko.serialization.Serializer
+import akka.serialization.Serializer
 import io.bullet.borer.{Cbor, Codec, Decoder, Encoder}
 
 import scala.reflect.ClassTag
 
-abstract class CborPekkoSerializer[Ser] extends Serializer {
+abstract class CborAkkaSerializer[Ser] extends Serializer {
 
   private var registrations: List[(Class[_], Codec[_])] = Nil
 

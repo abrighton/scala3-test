@@ -5,11 +5,11 @@
 
 package csw.commons.http
 
-import org.apache.pekko.http.scaladsl.model.*
-import org.apache.pekko.util.ByteString
+import akka.http.scaladsl.model.*
+import akka.util.ByteString
 import io.bullet.borer.Json
 import csw.commons.http.codecs.ErrorCodecs.*
-import io.bullet.borer.compat.pekko.*
+import io.bullet.borer.compat.akka.*
 
 /**
  * Internal API used by HTTP servers for exception handling.

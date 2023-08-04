@@ -11,8 +11,8 @@ object Common {
     organizationName                                := "test",
     scalaVersion                                    := Libs.ScalaVersion,
     homepage                                        := Some(url("https://github.com/tmtsoftware/csw")),
-    resolvers += "Apache Pekko Staging".at("https://repository.apache.org/content/groups/staging"),
-    resolvers += "Apache Pekko Snapshots".at("https://repository.apache.org/content/groups/snapshots"),
+    resolvers += "Apache Akka Staging".at("https://repository.apache.org/content/groups/staging"),
+    resolvers += "Apache Akka Snapshots".at("https://repository.apache.org/content/groups/snapshots"),
     resolvers += "jitpack" at "https://jitpack.io",
     scmInfo := Some(
       ScmInfo(url("https://github.com/tmtsoftware/csw"), "git@github.com:tmtsoftware/csw.git")
@@ -37,7 +37,7 @@ object Common {
     // and the maven repo match
     version := sys.env.getOrElse("JITPACK_VERSION", "0.1.0-SNAPSHOT"),
     fork    := true,
-    Test / javaOptions ++= Seq("-Dpekko.actor.serialize-messages=on", s"-DRTM_PATH=${file("./target/RTM").getAbsolutePath}"),
+    Test / javaOptions ++= Seq("-Dakka.actor.serialize-messages=on", s"-DRTM_PATH=${file("./target/RTM").getAbsolutePath}"),
     autoCompilerPlugins     := true,
     Global / cancelable     := true, // allow ongoing test(or any task) to cancel with ctrl + c and still remain inside sbt
     Global / excludeLintKeys := Set(

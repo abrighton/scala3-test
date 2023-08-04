@@ -14,20 +14,20 @@ object Borer {
 
   val `borer-core` = dep(Org %%% "borer-core" % Version)
   val `borer-derivation` = dep(Org %%% "borer-derivation" % Version)
-  val `borer-compat-pekko` = Org %% "borer-compat-pekko" % Version
+  val `borer-compat-akka` = Org %% "borer-compat-akka" % Version
 }
 
-object Pekko {
-  val Version = "1.0.1" // all pekko is Apache License 2.0
-  val Org = "org.apache.pekko"
+object Akka {
+  val Version = "2.8.3" // all akka is Apache License 2.0
+  val Org = "com.typesafe.akka"
 
-  val `pekko-actor` = Org %% "pekko-actor" % Version
-  val `pekko-actor-typed` = Org %% "pekko-actor-typed" % Version
+  val `akka-actor` = Org %% "akka-actor" % Version
+  val `akka-actor-typed` = Org %% "akka-actor-typed" % Version
 }
 
-object PekkoHttp {
-  val Version = "1.0.0"
-  val Org = "org.apache.pekko"
+object AkkaHttp {
+  val Version = "10.5.2"
+  val Org = "com.typesafe.akka"
 
-  val `pekko-http` = Org %% "pekko-http" % Version
+  val `akka-http` = Org %% "akka-http" % Version
 }
