@@ -1,5 +1,7 @@
 # scala3-test
 
+### Note: Problem solved: Was missing dependency on pekko-stream!
+
 Test issue with scala-3.3.0: "dotty.tools.FatalError: cannot resolve reference ..."
 
 This small test project demonstrates an error with the scala3 compiler.

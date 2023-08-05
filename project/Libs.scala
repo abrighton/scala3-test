@@ -22,6 +22,7 @@ object Pekko {
   val Org = "org.apache.pekko"
 
   val `pekko-actor` = Org %% "pekko-actor" % Version
+  val `pekko-stream` = Org %% "pekko-stream" % Version
   val `pekko-actor-typed` = Org %% "pekko-actor-typed" % Version
 }
 
