@@ -4,6 +4,7 @@ object Dependencies {
 
   val ScalaTestDeps = Def.setting(
     Seq(
+      Libs.`play-json`,
       Pekko.`pekko-actor` % Provided,
       Pekko.`pekko-stream` % Provided,
       Pekko.`pekko-actor-typed` % Provided,

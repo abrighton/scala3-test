@@ -4,11 +4,12 @@ import sbt._
 
 object Libs {
   val ScalaVersion = "3.3.0"
+  val `play-json` = "com.typesafe.play" %% "play-json" % "2.10.0-RC9"
 }
 
 object Borer {
   //  val Version = "1.11.0"
-  val Version = "687c9de"
+  val Version = "4f406eb"
   //  val Org     = "io.bullet"
   val Org = "com.github.tmtsoftware.borer"
 
