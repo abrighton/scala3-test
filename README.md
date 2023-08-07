@@ -1,54 +1,65 @@
 # scala3-test
 
-### Note: Problem solved: Was missing dependency on pekko-stream!
+This repo demonstrates an issue with a Java-17 function calling a Scala 3.3.0 macro and getting this error:
 
-Test issue with scala-3.3.0: "dotty.tools.FatalError: cannot resolve reference ..."
-
-This small test project demonstrates an error with the scala3 compiler.
-
-This is the result I get when compiling with java17, scala-3.3.0:
-
-```shell
-> sbt compile
-[info] welcome to sbt 1.9.3 (Private Build Java 17.0.8)
-[info] loading global plugins from /home/abrighto/.sbt/1.0/plugins
-[info] loading settings for project scala3-test-build from plugins.sbt ...
-[info] loading project definition from /testDir/scala3-test/project
-[info] compiling 3 Scala sources to /testDir/scala3-test/project/target/scala-2.12/sbt-1.0/classes ...
-[info] loading settings for project root from build.sbt ...
-[info] set current project to scala3-test (in build file:/testDir/scala3-test/)
-[info] Executing in batch mode. For better performance use sbt's shell
-[info] compiling 6 Scala sources to /testDir/scala3-test/target/scala-3.3.0/classes ...
-dotty.tools.FatalError: cannot resolve reference to type org.apache.pekko.stream.scaladsl.type.Source
-the classfile defining the type might be missing from the classpath while typechecking /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala
-[info] exception occurred while typechecking /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala
-[info] exception occurred while compiling /testDir/scala3-test/src/main/scala/csw/commons/CborPekkoSerializer.scala, /testDir/scala3-test/src/main/scala/csw/commons/ResourceReader.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/ErrorResponse.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/JsonRejectionHandler.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/codecs/ErrorCodecs.scala
-[error] cannot resolve reference to type org.apache.pekko.stream.scaladsl.type.Source
-[error] the classfile defining the type might be missing from the classpath
-[error] (Compile / compileIncremental) Compilation failed
-[error] Total time: 3 s, completed Aug 4, 2023, 11:05:34 PM
+```
+[error] /testDir/scala3-test/src/main/scala/csw/params/Test.java:7:1: cannot access io.bullet.borer.Encoder
+[error]   bad class file: /home/user/.cache/coursier/v1/https/repo1.maven.org/maven2/io/bullet/borer-core_3/1.11.0/borer-core_3-1.11.0.jar(/io/bullet/borer/Encoder.class)
+[error]     undeclared type variable: B
+[error]     Please remove or make sure it appears in the correct subdirectory of the classpath.
 ```
 
-I have not found any references to `org.apache.pekko.stream.scaladsl.type.Source` in any of the dependencies or in this code.
+The Scala class:
 
-Note that the akka version (branch: "akka-version") shows the same error:
+```scala 3
+import java.nio.charset.StandardCharsets
+import io.bullet.borer.*
+import io.bullet.borer.derivation.CompactMapBasedCodecs.deriveCodec
+import play.api.libs.json.{Json => PJson, _}
 
-```shell
-> sbt compile
-[info] welcome to sbt 1.9.3 (Private Build Java 17.0.8)
-[info] loading global plugins from /home/abrighto/.sbt/1.0/plugins
-[info] loading settings for project scala3-test-build from plugins.sbt ...
-[info] loading project definition from /testDir/scala3-test/project
-[info] loading settings for project root from build.sbt ...
-[info] set current project to scala3-test (in build file:/testDir/scala3-test/)
-[info] Executing in batch mode. For better performance use sbt's shell
-[info] compiling 6 Scala sources to /testDir/scala3-test/target/scala-3.3.0/classes ...
-dotty.tools.FatalError: cannot resolve reference to type akka.stream.scaladsl.type.Source
-the classfile defining the type might be missing from the classpath while typechecking /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala
-[info] exception occurred while typechecking /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala
-[info] exception occurred while compiling /testDir/scala3-test/src/main/scala/csw/commons/CborPekkoSerializer.scala, /testDir/scala3-test/src/main/scala/csw/commons/ResourceReader.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/ErrorResponse.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/JsonRejectionHandler.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/JsonSupport.scala, /testDir/scala3-test/src/main/scala/csw/commons/http/codecs/ErrorCodecs.scala
-[error] cannot resolve reference to type akka.stream.scaladsl.type.Source
-[error] the classfile defining the type might be missing from the classpath
-[error] (Compile / compileIncremental) Compilation failed
-[error] Total time: 3 s, completed Aug 4, 2023, 11:14:27 PM
+object JsonSupport extends JsonSupport
+
+trait JsonSupport {
+  def writes[T: Encoder](x: T): JsValue = PJson.parse(Json.encode(x).toUtf8String)
+  def reads[T: Decoder](x: JsValue): T  = Json.decode(x.toString().getBytes(StandardCharsets.UTF_8)).to[T].value
+}
+
+case class ProperMotion(pmx: Double, pmy: Double)
+
+object ProperMotion {
+  implicit val properMotionCodec: Codec[ProperMotion] = deriveCodec
+}
+```
+
+The Java class:
+
+```java
+public class Test {
+
+    public void shouldConvertPmToFromJSON() {
+        var pm = new ProperMotion(0.5, 2.33);
+        var pmjs = JsonSupport.writes(pm, ProperMotion.properMotionCodec().encoder());
+    }
+}
+```
+
+And deriveCodec looks like this:
+
+```scala 3
+  inline def deriveCodec[T]: Codec[T] = Codec(deriveEncoder[T], deriveDecoder[T])
+```
+
+The class file is not corrupted (I have tested with multiple versions).
+This seems to be an issue with Java calling an inline Scala function.
+
+The Scala version compiles:
+
+```scala 3
+class TestX {
+
+  def shouldConvertPmToFromJSON(): Unit = {
+    val pm = ProperMotion(0.5, 2.33)
+    val pmjs = JsonSupport.writes(pm)
+  }
+}
 ```
