@@ -63,3 +63,5 @@ class TestX {
   }
 }
 ```
+
+This type of code compiled previously under Scala-2.13.
